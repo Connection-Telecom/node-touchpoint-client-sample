@@ -1,0 +1,15 @@
+{
+  "name": "touchpoint-client-sample",
+  "version": "1.0.0",
+  "description": "Sample for touchpoint-client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Davies",
+  "license": "ISC",
+  "dependencies": {
+    "ansi-color": "^0.2.1",
+    "touchpoint-client": "^1.0.0"
+  }
+}
