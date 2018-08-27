@@ -9,8 +9,8 @@ const rl = readline.createInterface(process.stdin, process.stdout);
 let ready = false;
 
 function printMessage(msg) {
-  process.stdout.clearLine();
-  process.stdout.cursorTo(0);
+  readline.clearLine(process.stdout, 0);
+  readline.cursorTo(process.stdout, 0);
   console.log(msg);
   if (ready) {
     rl.prompt(true);
