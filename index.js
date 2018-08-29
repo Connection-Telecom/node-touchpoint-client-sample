@@ -43,7 +43,7 @@ chat.on('closed', () => {
 });
 
 chat.on('error', err => {
-  printMessage('Something went terribly wrong', err);
+  console.log('Something went terribly wrong', err);
   process.exit(-1);
 });
 
