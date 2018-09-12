@@ -18,7 +18,7 @@ const client = touchpoint.createClient();
 client.on('message', (evt, chatId) => {
   if (evt.type === 'agentMsg') {
     if (evt.message === 'close') {
-      client.closeChat(chatId);
+      client.closeChat(chatId).catch(errorHandler('while closing a chat'));
     } else if (/^create /.test(evt.message)) {
       createChat(evt.message.replace(/^create /, ''));
     } else {
