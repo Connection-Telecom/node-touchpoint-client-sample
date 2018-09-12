@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "ansi-color": "^0.2.1",
-    "touchpoint-client": "^1.0.0"
+    "touchpoint-client": "^2.0.0"
   }
 }

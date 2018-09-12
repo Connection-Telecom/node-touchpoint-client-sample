@@ -6,13 +6,13 @@ const touchpoint = require('touchpoint-client');
 const color = require('ansi-color').set;
 
 const rl = readline.createInterface(process.stdin, process.stdout);
-let ready = false;
+let chatCreated = false;
 
 function printMessage(msg) {
   readline.clearLine(process.stdout, 0);
   readline.cursorTo(process.stdout, 0);
   console.log(msg);
-  if (ready) {
+  if (chatCreated) {
     rl.prompt(true);
   }
 }
@@ -21,10 +21,14 @@ function printChatMessage(sender, message) {
   printMessage(color(`[${sender}]`, 'blue') + ' ' + message);
 }
 
-// Please change the customer ID and team to your own customer before running!
-const chat = touchpoint.createChat({customerId: 'tDNRFKYYtyrAnhais', team: 'Spinners'});
+const errorHandler = when => err => {
+  console.log(`Something went terribly wrong ${when}`, err);
+  process.exit(-1);
+}
 
-chat.on('message', evt => {
+const client = touchpoint.createClient();
+
+client.on('message', (evt, chatId) => {
   if (evt.type === 'agentMsg') {
     printChatMessage(evt.agent, evt.message);
   } else {
@@ -32,31 +36,27 @@ chat.on('message', evt => {
   }
 });
 
-chat.on('ready', () => {
-  ready = true;
-  isReady();
-});
-
-chat.on('closed', () => {
+client.on('chatClosed', chatId => {
+  client.close();
   rl.close();
   process.exit(0);
 });
 
-chat.on('error', err => {
-  console.log('Something went terribly wrong', err);
-  process.exit(-1);
-});
+client.on('error', errorHandler(''));
 
 // ^C or ^D
 rl.on('close', () => {
-  chat.close();
+  client.close();
   process.exit(0);
 });
 
-function isReady() {
+// Please change the customer ID and team to your own customer before running!
+client.createChat({customerId: 'hn5QvbX3btsR2Fsks', team: 'default'}).then(chatId => {
+  chatCreated = true;
   rl.prompt(true);
+
   rl.on('line', line => {
-    chat.sendMessage(line);
+    client.sendMessage(line, chatId).catch(errorHandler('while sending a message'));
     readline.moveCursor(process.stdout, 0, -1); // Overwrite the "> blah" prompt line
     printChatMessage('You', line);
   });
@@ -68,12 +68,12 @@ function isReady() {
     // command line, so instead assume the current line is empty if a return or backspace was typed.
     if (key != null && ['return', 'backspace'].indexOf(key.name) > -1) {
       if (userLastKeypress > 0) {
-        chat.setUserIsTyping(false);
+        client.setUserIsTyping(false, chatId).catch(errorHandler('while setting userIsTyping'));
       }
       userLastKeypress = 0;
     } else {
       if (userLastKeypress === 0) {
-        chat.setUserIsTyping(true);
+        client.setUserIsTyping(true, chatId).catch(errorHandler('while setting userIsTyping'));
       }
       userLastKeypress = +(new Date());
     }
@@ -85,12 +85,12 @@ function isReady() {
     const now = +(new Date);
     if (userLastKeypress > 0 && now - userLastKeypress > 10000) {
       userLastKeypress = 0;
-      chat.setUserIsTyping(false);
+      client.setUserIsTyping(false, chatId).catch(errorHandler('while setting userIsTyping'));
     }
   }, 1000);
-}
+}).catch(errorHandler('while creating the chat'));
 
-chat.on('agentIsTyping', evt => {
+client.on('agentIsTyping', (evt, chatId) => {
   if (evt.agentIsTyping) {
     // Display "agent is typing" notification
   } else {
